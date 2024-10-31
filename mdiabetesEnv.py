@@ -1,7 +1,5 @@
 import torch
 import numpy as np
-from utils.behavior_data import BehaviorData
-from models.BasicNN import BasicNN
 import json
 
 def _padded_binary(a, b):
