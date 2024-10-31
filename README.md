@@ -1,0 +1,8 @@
+Most functionality in this repository requires the `arogya_content` and `local_storage` folders, which are not included. Ensure that these folders are properly added to the main repository directory.
+
+There are three main scripts included here:
+ - `mdiabetes_rl_exp.py` contains the code for applying our reinforcement learning method to the simulated diabetes messaging domain. In addition to the directories mentioned above, this requires a trained predictive model for weekly participant behavior. A trained model is included in `trainedDiabetesPred.pt`, which is then read in and utilized in the `mdiabetesEnv.py` file, to facilitate simulation of the diabetes messaging domain.
+ - `mujoco_exp.py` contains the code for experiments in the MuJoCo gym environments, which are used as additional testing domains for our reinforcement learning method.
+ - `mdiabetesBehaviorModel.py` contains the code for training a predictive model of weekly participant behavior.
+
+In addition to these scripts, various required utility files are included. The most notable of these is `utils/behavior_data.py` which is responsible for the extraction, loading, and transformation of the raw weekly messaging data. This file has become quite unwieldy, but it provides many different options for data transformation that can be used in experiments. I'm currently working on refactoring the code base to streamline the data processing while maintaining compatibility with existing experiment code. 
