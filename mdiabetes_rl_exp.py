@@ -32,12 +32,12 @@ parser.add_argument("--startLearning", type=int, default=10000, help="no. sample
 parser.add_argument("--bufferSize", type=int, default=100000, help="no. samples in buffer")
 parser.add_argument("--train_batches", type=int, default=100, help="no. batches per timestep")
 parser.add_argument("--envSteps", type=int, default=100, help="no. environment steps per timestep")
-parser.add_argument("--logging", type=toBool, default=False)
+parser.add_argument("--logging", type=toBool, default=False, help="Log data to disk")
 parser.add_argument("--keepRealData", type=toBool, default=True, help="Keep all real world data in the replay buffer (do not replace it)")
-parser.add_argument("--cuda", type=toBool, default=False)
-parser.add_argument("--endQPred", type=toBool, default=False)
-parser.add_argument("--statepred", type=toBool, default=False)
-parser.add_argument("--statemodel", type=str, default="lstm")
+parser.add_argument("--cuda", type=toBool, default=False, help="Use GPU for neural nets")
+parser.add_argument("--endQPred", type=toBool, default=True, help="Use prediction of end questionnare to compute episodic rewards")
+parser.add_argument("--statepred", type=toBool, default=False, help="Use state predictive model (our method)")
+parser.add_argument("--statemodel", type=str, default="lstm", help="Architecture to use for state predictive model")
 parser.add_argument("--numBreaks", type=int, default=4, help="Minibatches for state pred training")
 
 
@@ -473,7 +473,6 @@ buff = Buffer(args.bufferSize)
 state = None
 startingStates = []
 endStatePredFeatures = {}
-rewardState = None
 # go through each row (rows are pre-sorted by week and participant)
 # we are translating the table information into the replay buffer format
 for idx, row in bd.data.iterrows():
@@ -496,7 +495,6 @@ for idx, row in bd.data.iterrows():
         dones = []
         endStatePredFeatures[row['pid']] = []
         state = np.array(row['state'])
-        rewardState = state
         startingStates.append(state)
         obs.append(state)
         knownses.append(np.ones_like(state))
@@ -514,10 +512,7 @@ for idx, row in bd.data.iterrows():
             knowns[row['paction_sids'][0] - 1] = 1
         if row['response'][1] > -1:
             knowns[row['paction_sids'][1] - 1] = 1
-        # decay the underlying participant state used to calculate rewards
-        # intuition is that participants get worse in an area if they're not messaged in that area
-        rewardState[~knowns] = rewardState[~knowns] * args.rewardStateDecay
-        rewardState[knowns] = state[knowns]
+        # append state belief and knowns to the lists
         obs.append(state)
         knownses.append(knowns)
     # build participant feature set for predicting end questionnaire results
