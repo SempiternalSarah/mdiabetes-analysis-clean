@@ -432,7 +432,7 @@ rewsDiff = {}
 endStateLabel = {}
 for gid in pre.keys():
     if gid in post.keys():
-        rewsDiff[gid] = np.sum(post[gid] - pre[gid])
+        rewsDiff[gid] = np.sum(post[gid][0:maxSId] - pre[gid][0:maxSId])
         endStateLabel[gid] = post[gid][0:maxSId] - pre[gid][0:maxSId]
 
 # transform participant data for use in predicting end states from action/response sequence
@@ -543,7 +543,7 @@ eqlabs = np.stack(eqlabs)
 eqlabs = torch.tensor(eqlabs).float()
 # initialize model and optimizer
 eqmodel = EndQLSTMNetwork(eqfeats.shape[-1], eqlabs.shape[-1])
-eqopt = optim.Adam(list(eqmodel.parameters()), 0.003)
+eqopt = optim.Adam(list(eqmodel.parameters()), 0.0001)
 lfn = torch.nn.MSELoss()
 # train end state predictive model
 # 500 epochs seems about right to converge without overfitting
